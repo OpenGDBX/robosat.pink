@@ -70,8 +70,7 @@ class DatasetFilesConcat(torch.utils.data.Dataset):
 
         for channel in self.channels:
             try:
-                data, band_tile = self.inputs[channel["sub"]][i]
-                assert band_tile == tile
+                data = self.inputs[channel["sub"]][i]
 
                 for band in channel["bands"]:
                     data_band = data[:, :, int(band) - 1] if len(data.shape) == 3 else []
