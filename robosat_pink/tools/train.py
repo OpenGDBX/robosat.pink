@@ -22,6 +22,7 @@ from robosat_pink.transforms import (
     MaskToTensor,
 )
 from robosat_pink.datasets import DatasetTilesConcat
+from robosat_pink.flat_datasets import DatasetFilesConcat
 from robosat_pink.metrics import Metrics
 from robosat_pink.config import load_config
 from robosat_pink.logs import Logs
@@ -301,14 +302,14 @@ def get_dataset_loaders(path, config, workers):
         ]
     )
 
-    dataset_train = DatasetTilesConcat(
+    dataset_train = DatasetFilesConcat(
         os.path.join(path, "training"),
         config["channels"],
         os.path.join(path, "training", "labels"),
         joint_transform=transform,
     )
 
-    dataset_val = DatasetTilesConcat(
+    dataset_val = DatasetFilesConcat(
         os.path.join(path, "validation"),
         config["channels"],
         os.path.join(path, "validation", "labels"),

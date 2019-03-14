@@ -44,7 +44,7 @@ class DatasetFiles(torch.utils.data.Dataset):
         return image
 
 
-class DatasetTilesConcat(torch.utils.data.Dataset):
+class DatasetFilesConcat(torch.utils.data.Dataset):
     """Dataset to concate multiple input images stored in slippy map format."""
 
     def __init__(self, path, channels, target, joint_transform=None):
