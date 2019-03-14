@@ -172,8 +172,8 @@ def train(loader, num_classes, device, net, optimizer, criterion):
     metrics = Metrics()
 
     net.train()
-
-    for images, masks, tiles in tqdm(loader, desc="Train", unit="batch", ascii=True):
+    #for images, masks, tiles in tqdm(loader, desc="Train", unit="batch", ascii=True):
+    for images, masks in tqdm(loader, desc="Train", unit="batch", ascii=True):
         images = images.to(device)
         masks = masks.to(device)
 
@@ -217,7 +217,8 @@ def validate(loader, num_classes, device, net, criterion):
     net.eval()
 
     with torch.no_grad():
-        for images, masks, tiles in tqdm(loader, desc="Validate", unit="batch", ascii=True):
+        #for images, masks, tiles in tqdm(loader, desc="Validate", unit="batch", ascii=True):
+        for images, masks in tqdm(loader, desc="Validate", unit="batch", ascii=True):
             images = images.to(device)
             masks = masks.to(device)
 
@@ -243,6 +244,44 @@ def validate(loader, num_classes, device, net, criterion):
         "fg_iou": metrics.get_fg_iou(),
         "mcc": metrics.get_mcc(),
     }
+
+
+def get_dataset_loaders1(path, config, workers):
+
+    std = []
+    mean = []
+    for channel in config["channels"]:
+        std.extend(channel["std"])
+        mean.extend(channel["mean"])
+
+    transform = JointCompose(
+        [
+            JointResize(config["model"]["tile_size"]),
+            JointRandomFlipOrRotate(config["model"]["data_augmentation"]),
+            JointTransform(ImageToTensor(), MaskToTensor()),
+            JointTransform(Normalize(mean=mean, std=std), None),
+        ]
+    )
+
+    dataset_train = DatasetTilesConcat(
+        os.path.join(path, "training"),
+        config["channels"],
+        os.path.join(path, "training", "labels"),
+        joint_transform=transform,
+    )
+
+    dataset_val = DatasetTilesConcat(
+        os.path.join(path, "validation"),
+        config["channels"],
+        os.path.join(path, "validation", "labels"),
+        joint_transform=transform,
+    )
+
+    batch_size = config["model"]["batch_size"]
+    train_loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=workers)
+    val_loader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, drop_last=True, num_workers=workers)
+
+    return train_loader, val_loader
 
 
 def get_dataset_loaders(path, config, workers):
