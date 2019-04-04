@@ -4,7 +4,7 @@ import random
 import torch
 import cv2
 import numpy as np
-
+import random
 
 class ImageToTensor:
     """Callable to convert a NumPy H,W,C image into a PyTorch C,W,H tensor."""
@@ -94,3 +94,25 @@ class JointResize:
             mask = cv2.resize(mask, self.hw, interpolation=cv2.INTER_NEAREST)
 
         return image, mask
+
+class JointRandomCrop:
+    """Callable to resize image and its mask."""
+
+    def __init__(self, size):
+        self.hw = (size, size)
+
+    def __call__(self, image, mask):
+        
+        if self.hw == image.shape[0:2]:
+            pass
+        h,w = image.shape[0:2]
+        th,tw = self.hw
+
+        i = random.randint(0, h - th)
+        j = random.randint(0, w - tw)
+
+        image = image[i:i+th,j:j+tw]
+        mask = mask[i:i+th,j:j+tw]
+
+        return image, mask
+

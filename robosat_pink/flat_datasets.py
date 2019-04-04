@@ -41,7 +41,7 @@ class DatasetFiles(torch.utils.data.Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        return image
+        return image,path
 
 
 class DatasetFilesConcat(torch.utils.data.Dataset):
@@ -66,11 +66,11 @@ class DatasetFilesConcat(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
 
-        mask = self.target[i]
+        mask,path = self.target[i]
 
         for channel in self.channels:
             try:
-                data = self.inputs[channel["sub"]][i]
+                data,path = self.inputs[channel["sub"]][i]
 
                 for band in channel["bands"]:
                     data_band = data[:, :, int(band) - 1] if len(data.shape) == 3 else []
@@ -82,4 +82,4 @@ class DatasetFilesConcat(torch.utils.data.Dataset):
         if self.joint_transform is not None:
             tensor, mask = self.joint_transform(tensor, mask)
 
-        return tensor, mask
+        return tensor, mask,path
